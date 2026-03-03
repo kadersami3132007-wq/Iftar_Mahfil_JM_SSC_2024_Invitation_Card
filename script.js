@@ -1,10 +1,11 @@
-const scriptURL = 'https://script.google.com/macros/s/AKfycbw_FUz1ujICQTrp9F9zLqgFHzdriQSnhmruXO1x1hvYQFs0D-U_gvKVanLM4ilYax/exec';
+// আপনার নতুন জেনারেট করা Apps Script URL
+const scriptURL = 'https://script.google.com/macros/s/AKfycbzwJww2pFV6n4A4U-Mosz6AcgqyIg7q7at3MAzzGb301yuRWNdauvLx3weHyYaV8LMW/exec';
 
 async function generateCard() {
-    const phone = document.getElementById('phoneInput').value;
-    const btn = document.getElementById('genBtn');
+    const phoneInput = document.getElementById('phoneInput').value.trim();
+    const btn = document.querySelector('button');
     
-    if(phone.length < 11) { 
+    if(phoneInput.length < 11) { 
         alert("বন্ধু, সঠিক ১১ ডিজিটের মোবাইল নম্বরটি দাও।"); 
         return; 
     }
@@ -14,13 +15,13 @@ async function generateCard() {
     btn.disabled = true;
 
     try {
-        const response = await fetch(`${scriptURL}?phone=${phone}`);
+        const response = await fetch(`${scriptURL}?phone=${phoneInput}`);
         const result = await response.json();
 
         if (result === "Not Found") {
-            alert("দুঃখিত! এই নম্বরটি আমাদের তালিকায় নেই অথবা পেমেন্ট ভেরিফাই হয়নি।");
+            alert("দুঃখিত! এই নম্বরটি আমাদের তালিকায় নেই অথবা নম্বরটি ভুল হয়েছে।");
         } else {
-            drawCard(result.name, result.group, phone, result.status);
+            drawCard(result.name, result.group, phoneInput, "Confirmed");
             document.getElementById('card-container').style.display = 'block';
         }
     } catch (error) {
@@ -36,7 +37,7 @@ function drawCard(name, group, phone, status) {
     const canvas = document.getElementById('inviteCanvas');
     const ctx = canvas.getContext('2d');
 
-    // ব্যাকগ্রাউন্ড (Royal Blue)
+    // ব্যাকগ্রাউন্ড ডিজাইন (Royal Blue)
     ctx.fillStyle = '#1a237e';
     ctx.fillRect(0, 0, 800, 500);
     
@@ -54,7 +55,7 @@ function drawCard(name, group, phone, status) {
     ctx.font = '22px Arial';
     ctx.fillText("এসএসসি ব্যাচ ২০২৪ | ময়মনসিংহ", 400, 120);
 
-    // তথ্যগুলো বাম দিক থেকে সাজানো
+    // তথ্যগুলো (বাম দিক থেকে)
     ctx.textAlign = "left";
     ctx.fillStyle = 'white';
     ctx.font = 'bold 35px Arial';
@@ -64,12 +65,12 @@ function drawCard(name, group, phone, status) {
     ctx.fillText("গ্রুপ: " + group, 80, 280);
     ctx.fillText("মোবাইল: " + phone, 80, 330);
     
-    // স্ট্যাটাস (সবুজ রঙে)
+    // স্ট্যাটাস
     ctx.fillStyle = '#2ecc71';
     ctx.font = 'bold 30px Arial';
     ctx.fillText("স্ট্যাটাস: " + status, 80, 400);
 
-    // নিচের ছোট মেসেজ
+    // নিচের মেসেজ
     ctx.fillStyle = '#bdc3c7';
     ctx.font = 'italic 20px Arial';
     ctx.fillText("আপনার উপস্থিতি কাম্য - সামি ও বন্ধুরা", 80, 450);
@@ -81,15 +82,4 @@ function downloadCard() {
     link.download = 'Iftar_Invitation_2026.png';
     link.href = canvas.toDataURL();
     link.click();
-}
-
-// সোশ্যাল শেয়ার ফাংশন
-function shareWA() {
-    const text = "বন্ধু! আমি ২০২৬-এর ইফতার মাহফিলে আসছি। তোমার ইনভাইটেশন কার্ডটি এখান থেকে সংগ্রহ করো: " + window.location.href;
-    window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(text));
-}
-
-function shareFB() {
-    const url = window.location.href;
-    window.open("https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(url));
 }
