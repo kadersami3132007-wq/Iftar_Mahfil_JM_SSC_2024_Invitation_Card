@@ -1,5 +1,5 @@
 // আপনার নতুন জেনারেট করা Apps Script URL
-const scriptURL = 'https://script.google.com/macros/s/AKfycbzwJww2pFV6n4A4U-Mosz6AcgqyIg7q7at3MAzzGb301yuRWNdauvLx3weHyYaV8LMW/exec';
+const scriptURL = 'https://script.google.com/macros/s/AKfycbzxVRXoPgov73Ma9EbbM91PdUWI7JBJGkRKoSz8OXfo8h4NPiOOn_HowbtmeHEk9iJX/exec';
 
 async function generateCard() {
     const phoneInput = document.getElementById('phoneInput').value.trim();
@@ -13,15 +13,22 @@ async function generateCard() {
     // লোডিং অবস্থা দেখানো
     btn.innerText = "যাচাই করা হচ্ছে...";
     btn.disabled = true;
+    document.getElementById('card-container').style.display = 'none';
 
     try {
         const response = await fetch(`${scriptURL}?phone=${phoneInput}`);
-        const result = await response.json();
+        const text = await response.text();
 
-        if (result === "Not Found") {
-            alert("দুঃখিত! এই নম্বরটি আমাদের তালিকায় নেই অথবা নম্বরটি ভুল হয়েছে।");
+        if (text === "Not Found") {
+            alert("দুঃখিত! এই নম্বরটি আমাদের তালিকায় নেই।");
+        } else if (text === "C") {
+            alert("দুঃখিত, আপনার রেজিষ্ট্রেশনটি বাতিল (Cancel) করা হয়েছে।");
+        } else if (text === "Pending") {
+            alert("আপনার রেজিষ্ট্রেশনটি বর্তমানে প্রক্রিয়াধীন রয়েছে। দয়া করে অপেক্ষা করুন।");
         } else {
-            drawCard(result.name, result.group, phoneInput, "Confirmed");
+            // ডাটা পাওয়া গেলে কার্ড তৈরি করা
+            const result = JSON.parse(text);
+            drawCard(result.name, result.group, phoneInput);
             document.getElementById('card-container').style.display = 'block';
         }
     } catch (error) {
@@ -33,47 +40,67 @@ async function generateCard() {
     }
 }
 
-function drawCard(name, group, phone, status) {
+function drawCard(name, group, phone) {
     const canvas = document.getElementById('inviteCanvas');
     const ctx = canvas.getContext('2d');
 
-    // ব্যাকগ্রাউন্ড ডিজাইন (Royal Blue)
-    ctx.fillStyle = '#1a237e';
+    // ১. প্রিমিয়াম ইসলামিক ব্যাকগ্রাউন্ড (Deep Green Gradient)
+    const grd = ctx.createLinearGradient(0, 0, 800, 500);
+    grd.addColorStop(0, "#004d40"); 
+    grd.addColorStop(1, "#002d26"); 
+    ctx.fillStyle = grd;
     ctx.fillRect(0, 0, 800, 500);
     
-    // সোনালী বর্ডার
-    ctx.strokeStyle = '#ffd700';
-    ctx.lineWidth = 20;
-    ctx.strokeRect(10, 10, 780, 480);
+    // ২. জলরং মসজিদের আর্ট (Watermark Effect)
+    ctx.globalAlpha = 0.1;
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(400, 450, 250, Math.PI, 0); 
+    ctx.fill();
+    ctx.globalAlpha = 1.0;
 
-    // শিরোনাম
-    ctx.fillStyle = '#ffd700';
-    ctx.font = 'bold 45px Arial';
+    // ৩. সোনালী চাঁদ ও তারা ডিজাইন
+    ctx.fillStyle = "#ffd700";
+    ctx.beginPath();
+    ctx.arc(100, 100, 45, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#004d40"; 
+    ctx.beginPath();
+    ctx.arc(125, 100, 45, 0, Math.PI * 2);
+    ctx.fill(); // Crescent Moon
+
+    // ৪. রাজকীয় সোনালী ডাবল বর্ডার
+    ctx.strokeStyle = '#d4af37';
+    ctx.lineWidth = 12;
+    ctx.strokeRect(15, 15, 770, 470);
+    ctx.lineWidth = 2;
+    ctx.strokeRect(35, 35, 730, 430);
+
+    // ৫. শিরোনাম
     ctx.textAlign = "center";
-    ctx.fillText("🌙 ইফতার মাহফিল ২০২৬", 400, 80);
+    ctx.fillStyle = '#ffd700';
+    ctx.font = 'bold 55px Arial';
+    ctx.fillText("🌙 ইফতার মাহফিল ২০২৬", 400, 120);
     
-    ctx.font = '22px Arial';
-    ctx.fillText("এসএসসি ব্যাচ ২০২৪ | ময়মনসিংহ", 400, 120);
+    ctx.font = '24px Arial';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText("এসএসসি ব্যাচ ২০২৪ | ময়মনসিংহ", 400, 165);
 
-    // তথ্যগুলো (বাম দিক থেকে)
+    // ৬. তথ্যাবলি প্রদর্শন
     ctx.textAlign = "left";
-    ctx.fillStyle = 'white';
-    ctx.font = 'bold 35px Arial';
-    ctx.fillText("নাম: " + name, 80, 220);
+    ctx.font = 'bold 42px Arial';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText("নাম: " + name, 100, 265);
     
-    ctx.font = '28px Arial';
-    ctx.fillText("গ্রুপ: " + group, 80, 280);
-    ctx.fillText("মোবাইল: " + phone, 80, 330);
+    ctx.font = '32px Arial';
+    ctx.fillStyle = '#ffd700';
+    ctx.fillText("গ্রুপ: " + group, 100, 330);
+    ctx.fillText("মোবাইল: " + phone, 100, 385);
     
-    // স্ট্যাটাস
+    // ৭. ভেরিফাইড স্ট্যাটাস ✅
     ctx.fillStyle = '#2ecc71';
     ctx.font = 'bold 30px Arial';
-    ctx.fillText("স্ট্যাটাস: " + status, 80, 400);
-
-    // নিচের মেসেজ
-    ctx.fillStyle = '#bdc3c7';
-    ctx.font = 'italic 20px Arial';
-    ctx.fillText("আপনার উপস্থিতি কাম্য - সামি ও বন্ধুরা", 80, 450);
+    ctx.fillText("Status: Verified ✅", 100, 445);
 }
 
 function downloadCard() {
