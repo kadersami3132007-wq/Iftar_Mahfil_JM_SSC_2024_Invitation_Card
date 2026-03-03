@@ -1,28 +1,95 @@
-function generateCard() {
+const scriptURL = 'https://script.google.com/macros/s/AKfycbw_FUz1ujICQTrp9F9zLqgFHzdriQSnhmruXO1x1hvYQFs0D-U_gvKVanLM4ilYax/exec';
+
+async function generateCard() {
     const phone = document.getElementById('phoneInput').value;
-    if(phone.length < 11) { alert("সঠিক নম্বর দিন"); return; }
+    const btn = document.getElementById('genBtn');
     
-    document.getElementById('card-container').style.display = 'block';
+    if(phone.length < 11) { 
+        alert("বন্ধু, সঠিক ১১ ডিজিটের মোবাইল নম্বরটি দাও।"); 
+        return; 
+    }
+    
+    // লোডিং অবস্থা দেখানো
+    btn.innerText = "যাচাই করা হচ্ছে...";
+    btn.disabled = true;
+
+    try {
+        const response = await fetch(`${scriptURL}?phone=${phone}`);
+        const result = await response.json();
+
+        if (result === "Not Found") {
+            alert("দুঃখিত! এই নম্বরটি আমাদের তালিকায় নেই অথবা পেমেন্ট ভেরিফাই হয়নি।");
+        } else {
+            drawCard(result.name, result.group, phone, result.status);
+            document.getElementById('card-container').style.display = 'block';
+        }
+    } catch (error) {
+        alert("সার্ভারে সমস্যা হচ্ছে। দয়া করে কিছুক্ষণ পর আবার চেষ্টা করো।");
+        console.error(error);
+    } finally {
+        btn.innerText = "কার্ড তৈরি করুন";
+        btn.disabled = false;
+    }
+}
+
+function drawCard(name, group, phone, status) {
     const canvas = document.getElementById('inviteCanvas');
     const ctx = canvas.getContext('2d');
 
-    // কালার ব্যাকগ্রাউন্ড
-    ctx.fillStyle = '#1e3a8a';
+    // ব্যাকগ্রাউন্ড (Royal Blue)
+    ctx.fillStyle = '#1a237e';
     ctx.fillRect(0, 0, 800, 500);
     
-    // টেক্সট
+    // সোনালী বর্ডার
+    ctx.strokeStyle = '#ffd700';
+    ctx.lineWidth = 20;
+    ctx.strokeRect(10, 10, 780, 480);
+
+    // শিরোনাম
+    ctx.fillStyle = '#ffd700';
+    ctx.font = 'bold 45px Arial';
+    ctx.textAlign = "center";
+    ctx.fillText("🌙 ইফতার মাহফিল ২০২৬", 400, 80);
+    
+    ctx.font = '22px Arial';
+    ctx.fillText("এসএসসি ব্যাচ ২০২৪ | ময়মনসিংহ", 400, 120);
+
+    // তথ্যগুলো বাম দিক থেকে সাজানো
+    ctx.textAlign = "left";
     ctx.fillStyle = 'white';
-    ctx.font = 'bold 40px Arial';
-    ctx.fillText("IFTAR MAHFIL 2026", 200, 100);
-    ctx.font = '30px Arial';
-    ctx.fillText("Phone: " + phone, 100, 250);
-    ctx.fillText("Status: CONFIRMED", 100, 300);
+    ctx.font = 'bold 35px Arial';
+    ctx.fillText("নাম: " + name, 80, 220);
+    
+    ctx.font = '28px Arial';
+    ctx.fillText("গ্রুপ: " + group, 80, 280);
+    ctx.fillText("মোবাইল: " + phone, 80, 330);
+    
+    // স্ট্যাটাস (সবুজ রঙে)
+    ctx.fillStyle = '#2ecc71';
+    ctx.font = 'bold 30px Arial';
+    ctx.fillText("স্ট্যাটাস: " + status, 80, 400);
+
+    // নিচের ছোট মেসেজ
+    ctx.fillStyle = '#bdc3c7';
+    ctx.font = 'italic 20px Arial';
+    ctx.fillText("আপনার উপস্থিতি কাম্য - সামি ও বন্ধুরা", 80, 450);
 }
 
 function downloadCard() {
     const canvas = document.getElementById('inviteCanvas');
     const link = document.createElement('a');
-    link.download = 'Invitation_Card.png';
+    link.download = 'Iftar_Invitation_2026.png';
     link.href = canvas.toDataURL();
     link.click();
+}
+
+// সোশ্যাল শেয়ার ফাংশন
+function shareWA() {
+    const text = "বন্ধু! আমি ২০২৬-এর ইফতার মাহফিলে আসছি। তোমার ইনভাইটেশন কার্ডটি এখান থেকে সংগ্রহ করো: " + window.location.href;
+    window.open("https://api.whatsapp.com/send?text=" + encodeURIComponent(text));
+}
+
+function shareFB() {
+    const url = window.location.href;
+    window.open("https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(url));
 }
