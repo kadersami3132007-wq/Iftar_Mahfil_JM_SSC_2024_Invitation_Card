@@ -1,4 +1,3 @@
-// আপনার নতুন জেনারেট করা Apps Script URL
 const scriptURL = 'https://script.google.com/macros/s/AKfycbzxVRXoPgov73Ma9EbbM91PdUWI7JBJGkRKoSz8OXfo8h4NPiOOn_HowbtmeHEk9iJX/exec';
 
 async function generateCard() {
@@ -10,7 +9,6 @@ async function generateCard() {
         return; 
     }
     
-    // লোডিং অবস্থা দেখানো
     btn.innerText = "যাচাই করা হচ্ছে...";
     btn.disabled = true;
     document.getElementById('card-container').style.display = 'none';
@@ -22,18 +20,16 @@ async function generateCard() {
         if (text === "Not Found") {
             alert("দুঃখিত! এই নম্বরটি আমাদের তালিকায় নেই।");
         } else if (text === "C") {
-            alert("দুঃখিত, আপনার রেজিষ্ট্রেশনটি বাতিল (Cancel) করা হয়েছে।");
+            alert("দুঃখিত, আপনার রেজিষ্ট্রেশনটি বাতিল করা হয়েছে।");
         } else if (text === "Pending") {
-            alert("আপনার রেজিষ্ট্রেশনটি বর্তমানে প্রক্রিয়াধীন রয়েছে। দয়া করে অপেক্ষা করুন।");
+            alert("আপনার রেজিষ্ট্রেশনটি বর্তমানে প্রক্রিয়াধীন রয়েছে।");
         } else {
-            // ডাটা পাওয়া গেলে কার্ড তৈরি করা
             const result = JSON.parse(text);
             drawCard(result.name, result.group, phoneInput);
             document.getElementById('card-container').style.display = 'block';
         }
     } catch (error) {
-        alert("সার্ভারে সমস্যা হচ্ছে। দয়া করে কিছুক্ষণ পর আবার চেষ্টা করো।");
-        console.error(error);
+        alert("সার্ভারে সমস্যা হচ্ছে। পরে চেষ্টা করো।");
     } finally {
         btn.innerText = "কার্ড তৈরি করুন";
         btn.disabled = false;
@@ -44,69 +40,77 @@ function drawCard(name, group, phone) {
     const canvas = document.getElementById('inviteCanvas');
     const ctx = canvas.getContext('2d');
 
-    // ১. প্রিমিয়াম ইসলামিক ব্যাকগ্রাউন্ড (Deep Green Gradient)
-    const grd = ctx.createLinearGradient(0, 0, 800, 500);
-    grd.addColorStop(0, "#004d40"); 
-    grd.addColorStop(1, "#002d26"); 
+    // ১. ব্যাকগ্রাউন্ড: গাঢ় নীল থেকে হালকা নীলের গ্রাডিয়েন্ট
+    const grd = ctx.createLinearGradient(0, 0, 0, 500);
+    grd.addColorStop(0, "#0a192f"); // Deep Navy Blue
+    grd.addColorStop(1, "#172a45"); 
     ctx.fillStyle = grd;
     ctx.fillRect(0, 0, 800, 500);
-    
-    // ২. জলরং মসজিদের আর্ট (Watermark Effect)
-    ctx.globalAlpha = 0.1;
+
+    // ২. মসজিদের সিলুয়েট (নিচের দিকে আবছা ছায়া)
+    ctx.globalAlpha = 0.2;
     ctx.fillStyle = "#ffffff";
+    // মাঝের বড় ডোম
     ctx.beginPath();
-    ctx.arc(400, 450, 250, Math.PI, 0); 
+    ctx.arc(400, 500, 200, Math.PI, 0);
     ctx.fill();
+    // দুই পাশের মিনার
+    ctx.fillRect(150, 300, 40, 200);
+    ctx.fillRect(610, 300, 40, 200);
     ctx.globalAlpha = 1.0;
 
-    // ৩. সোনালী চাঁদ ও তারা ডিজাইন
-    ctx.fillStyle = "#ffd700";
-    ctx.beginPath();
-    ctx.arc(100, 100, 45, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = "#004d40"; 
-    ctx.beginPath();
-    ctx.arc(125, 100, 45, 0, Math.PI * 2);
-    ctx.fill(); // Crescent Moon
+    // ৩. লণ্ঠন (Lanterns)
+    function drawLantern(x, y) {
+        ctx.fillStyle = "#ffcc33"; // Golden Glow
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x-15, y+20);
+        ctx.lineTo(x-15, y+50);
+        ctx.lineTo(x+15, y+50);
+        ctx.lineTo(x+15, y+20);
+        ctx.closePath();
+        ctx.fill();
+        // লণ্ঠনের দড়ি
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, y); ctx.stroke();
+    }
+    drawLantern(100, 80);
+    drawLantern(700, 80);
 
-    // ৪. রাজকীয় সোনালী ডাবল বর্ডার
-    ctx.strokeStyle = '#d4af37';
-    ctx.lineWidth = 12;
-    ctx.strokeRect(15, 15, 770, 470);
-    ctx.lineWidth = 2;
-    ctx.strokeRect(35, 35, 730, 430);
-
-    // ৫. শিরোনাম
+    // ৪. টেক্সট এরিয়া (সেন্ট্রাল টাইটেল)
     ctx.textAlign = "center";
-    ctx.fillStyle = '#ffd700';
-    ctx.font = 'bold 55px Arial';
-    ctx.fillText("🌙 ইফতার মাহফিল ২০২৬", 400, 120);
-    
-    ctx.font = '24px Arial';
     ctx.fillStyle = '#ffffff';
-    ctx.fillText("এসএসসি ব্যাচ ২০২৪ | ময়মনসিংহ", 400, 165);
+    ctx.font = 'bold 22px Arial';
+    ctx.fillText("JMian 108th • SSC Batch 2024", 400, 50);
 
-    // ৬. তথ্যাবলি প্রদর্শন
-    ctx.textAlign = "left";
-    ctx.font = 'bold 42px Arial';
+    ctx.fillStyle = '#ffcc33';
+    ctx.font = 'italic 30px Georgia';
+    ctx.fillText("Ramadan Kareem", 400, 100);
+
     ctx.fillStyle = '#ffffff';
-    ctx.fillText("নাম: " + name, 100, 265);
+    ctx.font = 'bold 60px Arial';
+    ctx.fillText("IFTAR MAHFIL", 400, 160);
+
+    // ৫. ব্যক্তিগত তথ্য
+    ctx.textAlign = "center";
+    ctx.font = 'bold 35px Arial';
+    ctx.fillStyle = '#ffcc33';
+    ctx.fillText(name, 400, 250);
     
-    ctx.font = '32px Arial';
-    ctx.fillStyle = '#ffd700';
-    ctx.fillText("গ্রুপ: " + group, 100, 330);
-    ctx.fillText("মোবাইল: " + phone, 100, 385);
-    
-    // ৭. ভেরিফাইড স্ট্যাটাস ✅
+    ctx.font = '22px Arial';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText("Group: " + group, 400, 290);
+    ctx.fillText("Phone: " + phone, 400, 320);
+
+    // ৬. তারিখ ও স্থান
+    ctx.font = 'bold 28px Arial';
+    ctx.fillText("18th March, 26", 400, 380);
+    ctx.font = '18px Arial';
+    ctx.fillText("Central Playground of Jogotmoni", 400, 410);
+
+    // ৭. ভেরিফাইড সিল
     ctx.fillStyle = '#2ecc71';
-    ctx.font = 'bold 30px Arial';
-    ctx.fillText("Status: Verified ✅", 100, 445);
-}
-
-function downloadCard() {
-    const canvas = document.getElementById('inviteCanvas');
-    const link = document.createElement('a');
-    link.download = 'Iftar_Invitation_2026.png';
-    link.href = canvas.toDataURL();
-    link.click();
+    ctx.font = 'bold 20px Arial';
+    ctx.fillText("Verified Invitation ✅", 400, 460);
 }
