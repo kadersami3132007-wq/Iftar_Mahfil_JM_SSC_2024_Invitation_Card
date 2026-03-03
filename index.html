@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iftar Invitation 2026</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>🌙 ইফতার ও পুনর্মিলনী ২০২৬</h2>
+        <input type="text" id="phoneInput" placeholder="আপনার ফোন নম্বর দিন" maxlength="11">
+        <button onclick="generateCard()">কার্ড তৈরি করুন</button>
+        <div id="card-container" style="display:none;">
+            <canvas id="inviteCanvas" width="800" height="500"></canvas>
+            <button onclick="downloadCard()">ডাউনলোড করুন</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
